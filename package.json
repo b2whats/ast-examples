@@ -1,0 +1,15 @@
+{
+  "name": "ast",
+  "version": "0.0.1",
+  "description": "",
+  "main": "ast.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "b2whats",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/parser": "^7.0.0-beta.48",
+    "@babel/traverse": "^7.0.0-beta.49"
+  }
+}
