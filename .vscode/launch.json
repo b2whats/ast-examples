@@ -7,11 +7,41 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Запустить программу",
+      "name": "Launch main",
       "args": [
         "--experimental-modules"
       ],
-      "program": "${workspaceFolder}/ast.js"
+      "program": "${workspaceFolder}/ast.js",
+      "console": "internalConsole",
+      "outputCapture": "std",
+      "runtimeArgs": [
+        "--nolazy"
+      ]
+    },
+    {
+      "name": "Attach",
+      "type": "node",
+      "request": "attach",
+      "port": 34120,
+      "address": "localhost",
+      "restart": false,
+      "sourceMaps": false,
+      "outFiles": [],
+      "localRoot": "${workspaceRoot}",
+      "remoteRoot": null
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch current file",
+      "args": [
+        "--experimental-modules"
+      ],
+      "program": "${file}",
+      "console": "internalConsole",
+      "runtimeArgs": [
+        "--nolazy"
+      ]
     }
   ]
 }

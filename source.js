@@ -1,9 +1,13 @@
-const mainScope = 1
+const a = 1
 
 function innerScope() {
-  let b = 0
+  const b = a
 
-  console.log(b)
-  b = b + 2
-  console.log(b)
+  for (let index = 0; index < 5; index++) {
+    acc1[index] = true
+  } // comment
+  
+  a = 3
+
+  return a + b
 }

@@ -5,8 +5,15 @@ const generate = require('@babel/generator').default
 
 const source = fs.readFileSync('./source.js', 'utf8')
 const visitor = require('./src/optimize.js')
+// const source = fs.readFileSync('./src/import/source.js', 'utf8')
+// const visitor = require('./src/import/import.js')
 
-const ast = parser.parse(source)
+const options = {
+  sourceType: 'module',
+  plugins: ['jsx']
+}
+
+const ast = parser.parse(source, options)
 
 traverse(ast, visitor)
 

@@ -9,7 +9,7 @@
   "author": "b2whats",
   "license": "ISC",
   "dependencies": {
-    "@babel/parser": "^7.0.0-beta.48",
+    "@babel/parser": "^7.0.0-beta.49",
     "@babel/traverse": "^7.0.0-beta.49"
   }
 }

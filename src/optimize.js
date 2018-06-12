@@ -1,17 +1,98 @@
-module.exports = {
-  Program: (nodePath) => {
-    console.log('Program')
-    // nodePath.traverse(evaluateVisitor)
-  },
-  VariableDeclarator: (nodePath) => {
-    nodePath.scope.crawl()
-    
-    if (nodePath.get('id').isIdentifier()) {
-      const {name} = nodePath.node.id
-      if (name in nodePath.scope.bindings) {
-        const binding = nodePath.scope.bindings[name]
-        nodePath.remove()
-      }
+const t = require('@babel/types')
+const WasCreated = Symbol('WasCreated')
+
+const valueToAST = value => {
+  switch (typeof value) {
+    case 'string': {
+      return t.stringLiteral(value)
+    }
+    case 'number': {
+      return t.numericLiteral(value)
+    }
+    case 'boolean': {
+      return t.booleanLiteral(value)
     }
   }
 }
+
+// const evaluateVisitor = {
+//   exit: (nodePath) => {
+//     if (nodePath.node[WasCreated]) { 
+//       nodePath.node[WasCreated] = false
+//       return
+//     }
+//     nodePath.scope.crawl()
+//     const {confident, value} = nodePath.evaluate()
+//     if (confident) {
+//       const val = valueToLiteral(value)
+//         val ? nodePath.replaceWith(val) : nodePath.remove()
+//     }
+//   },
+//   ReferencedIdentifier: (nodePath) => {
+//     nodePath.scope.crawl()
+//     const {name} = nodePath.node
+//     if (name in nodePath.scope.bindings) {
+//       const binding = nodePath.scope.bindings[name]
+//       const statement = nodePath.getStatementParent()
+//       const violations = statement.getAllPrevSiblings().filter(p => {
+//         return binding.constantViolations.filter(v => v.node.start === p.node.start).length > 0
+//       })
+//       if (violations.length === 0) {
+//         const {confident, value} = binding.path.get('init').evaluate()
+//         nodePath.replaceWith(valueToLiteral(value))
+//         return
+//       }
+
+//       // console.log('!', violations.getSource())
+//     }
+//   },
+//   AssignmentExpression: {
+//     exit: (nodePath) => {
+//       nodePath.scope.crawl()
+//       if (nodePath.get('left').isIdentifier()) {
+//         const {name} = nodePath.node.left
+//         if (name in nodePath.scope.bindings) {
+//           const binding = nodePath.scope.bindings[name]
+//           const statement = nodePath.getStatementParent()
+//           const refs = statement.getAllPrevSiblings().filter(p => {
+//             return binding.referencePaths.filter(r => r.node.start === p.node.start).length > 0
+//           })
+//           if (refs.length === 0) {
+//             const {operator, right} = nodePath.node
+//             if (operator === '=') {
+//               binding.path.get('init').replaceWith(right)
+//             } else {
+//               const left = binding.path.node.init
+//               const init = t.binaryExpression(operator.substr(0, 1), left, right)
+//               binding.path.get('init').replaceWith(init)
+//             }
+//             nodePath.remove()
+//           }
+//         }
+//       }
+//     }
+//   },
+// }
+
+module.exports = {
+  ReferencedIdentifier(path) {
+    const name = path.node.name
+    const binding = path.scope.getBinding(name)
+
+    if (binding && binding.constantViolations.length > 0) {
+      // return deopt(binding.path, state);
+    }
+
+
+    // path.evaluate()    
+    // const { confident, value } = path.evaluate()
+    
+    // if (confident) {
+    //   path.replaceWith(valueToAST(value))
+    // }
+  }
+}
+
+
+
+
