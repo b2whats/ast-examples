@@ -1,10 +1,9 @@
 const t = require('@babel/types')
-const imports = []
 
 module.exports = {
-  ImportDeclaration(path) {
-    const specifiers = path.node.specifiers
-    const source = path.node.source
+  ImportDeclaration(path, state) {
+    const { imports } = state
+    const { specifiers, source } = path.node
     
     const meta = {
       component: null,
@@ -12,6 +11,7 @@ module.exports = {
       alias: false,
       namespace: false,
       source: source.value,
+      fragment: path.getSource(),
     }
     
     // import './path'
@@ -24,15 +24,15 @@ module.exports = {
     
     for (const specifier of specifiers) {
       const localName = specifier.local.name
+      const references = path.scope.getBinding(localName).referencePaths
         
       // import A from './path'
       // import { default as A } from './path'
-      // import A, {} from './path'
       if (t.isSpecifierDefault(specifier) ) {
         imports.push({
           ...meta,
+          references,
           component: localName,
-          references: path.scope.getBinding(localName).referencePaths
         })
       
         continue
@@ -40,16 +40,16 @@ module.exports = {
       
 
       // import { A } from './path'
-      // import { A as ...} from './path'
+      // import { A as ... } from './path'
       if (t.isImportSpecifier(specifier) ) {
         const importedName = specifier.imported.name
         const isAlias = localName !== importedName
         
         imports.push({
           ...meta,
+          references,
           alias: isAlias && localName,
           component: importedName,
-          references: path.scope.getBinding(localName).referencePaths
         })
       
         continue
@@ -59,8 +59,8 @@ module.exports = {
       if (t.isImportNamespaceSpecifier(specifier)) {
         imports.push({
           ...meta,
+          references,
           namespace: true,
-          references: path.scope.getBinding(localName).referencePaths
         })
       
         continue
