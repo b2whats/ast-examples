@@ -9,6 +9,7 @@
   "author": "b2whats",
   "license": "ISC",
   "dependencies": {
-    "@babel/core": "^7.0.0-beta.51"
+    "@babel/core": "^7.0.0-beta.51",
+    "esprima": "^4.0.0"
   }
 }

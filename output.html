@@ -1,0 +1,13 @@
+<span class=Keyword>const</span> <span class=Identifier>a</span> <span class=Punctuator>=</span> <span class=Numeric>1</span>
+
+<span class=Keyword>function</span> <span class=Identifier>innerScope</span><span class=Punctuator>(</span><span class=Punctuator>)</span> <span class=Punctuator>{</span>
+  <span class=Keyword>const</span> <span class=Identifier>b</span> <span class=Punctuator>=</span> <span class=Identifier>a</span>
+
+  <span class=Keyword>for</span> <span class=Punctuator>(</span><span class=Keyword>let</span> <span class=Identifier>index</span> <span class=Punctuator>=</span> <span class=Numeric>0</span><span class=Punctuator>;</span> <span class=Identifier>index</span> <span class=Punctuator><</span> <span class=Numeric>5</span><span class=Punctuator>;</span> <span class=Identifier>index</span><span class=Punctuator>++</span><span class=Punctuator>)</span> <span class=Punctuator>{</span>
+    <span class=Identifier>acc1</span><span class=Punctuator>[</span><span class=Identifier>index</span><span class=Punctuator>]</span> <span class=Punctuator>=</span> <span class=Boolean>true</span>
+  <span class=Punctuator>}</span> <span class=LineComment>// comment</span>
+  
+  <span class=Identifier>a</span> <span class=Punctuator>=</span> <span class=Numeric>3</span>
+
+  <span class=Keyword>return</span> <span class=Identifier>a</span> <span class=Punctuator>+</span> <span class=Identifier>b</span>
+<span class=Punctuator>}</span>

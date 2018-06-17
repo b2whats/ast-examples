@@ -19,6 +19,17 @@
       ]
     },
     {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch highlight",
+      "program": "${workspaceFolder}/src/highlight/highlight.js",
+      "console": "internalConsole",
+      "outputCapture": "std",
+      "runtimeArgs": [
+        "--nolazy"
+      ]
+    },
+    {
       "name": "Attach",
       "type": "node",
       "request": "attach",

@@ -1,7 +1,6 @@
 class Source {
   constructor(code) {
     if (typeof code !== 'string') throw new Error('Source code should be a string')
-    if (code === '') throw new Error('Source code is empty')
 
     this.source = code
     this.lines = [''].concat(code.split('\n'))
