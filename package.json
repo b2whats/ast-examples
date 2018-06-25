@@ -10,6 +10,13 @@
   "license": "ISC",
   "dependencies": {
     "@babel/core": "^7.0.0-beta.51",
-    "esprima": "^4.0.0"
+    "babel-jest": "^23.0.1",
+    "esprima": "^4.0.0",
+    "jest-cli": "^23.1.0"
+  },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "<rootDir>/node_modules/"
+    ]
   }
 }

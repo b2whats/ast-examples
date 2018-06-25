@@ -1,3 +1,5 @@
+'use strict'
+
 const a = 1
 
 function innerScope() {

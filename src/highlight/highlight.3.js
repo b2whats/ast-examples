@@ -92,21 +92,6 @@ const sortNumber = (a, b) => {
   return a - b
 }
 
-const insertSort = (arr) => {
-  for (let i = 0, len = arr.length; i < len; i++) {
-      let j = i
-      let item = arr[j]
-
-      for(; j > 0 && arr[j - 1] > item; j--) {
-          arr[j] = arr[j - 1]
-      }
-
-      arr[j] = item
-  }
-
-  return arr
-}
-
 const generatePoints = (ranges) => {
   const start = performance.now()
   ranges.unshift({ start: 75, end: 95, length: 20, type: 'high', noSplit: true, split: [] })
@@ -181,8 +166,57 @@ const generatePoints = (ranges) => {
 
         continue
       }
-    }
 
+      // if (range.start < stackRange.end && range.end > stackRange.start) {
+      //   if (range.start >= stackRange.start && range.end <= stackRange.end
+      //   ||  range.start <= stackRange.start && range.end >= stackRange.end
+      //   ) {
+      //     continue
+      //   }
+
+        
+
+      //   if (range.noSplit) {
+      //     range1 = { ...stackRange }
+      //     range2 = { ...stackRange }
+      //   } else {
+      //     range1 = { ...range }
+      //     range2 = { ...range }
+      //   }
+
+      //   if (range.noSplit) {
+      //     if (range.start < stackRange.start) {
+      //       range1.end = range.end
+      //       range2.start = range.end
+      //     } else {
+      //       range1.end = range.start
+      //       range2.start = range.start
+      //     }
+      //   } else {
+      //     if (range.start < stackRange.start) {
+      //       range1.end = stackRange.start
+      //       range2.start = stackRange.start
+      //     } else {
+      //       range1.end = stackRange.end
+      //       range2.start = stackRange.end
+      //     }
+      //   }
+      //   if (stackRange.noSplit) {
+      //     points[range1.start].start.push(range1)
+      //     points[range2.start].start.push(range2)
+
+      //     stacks.splice(stacksLength, 1, range1, range2)
+      //   } else {
+      //     points[range1.start].start.push(range1)
+      //     points[range2.start].start.push(range2)
+
+      //     stacks.push(range1)
+      //     stacks.push(range2)
+      //   }
+
+      //   continue
+      // }
+    }
     if (range.noSplit) {
       stacks.unshift(range)
     } else {
@@ -192,8 +226,7 @@ const generatePoints = (ranges) => {
         continue
       }
 
-      insertSort(range.split)
-
+      range.split.sort(sortNumber)
       let cursor = range.start
 
       range.split.forEach(point => {
@@ -201,11 +234,6 @@ const generatePoints = (ranges) => {
 
         cursor = point
       })
-
-      range.start = cursor
-      range.length = range.end - cursor
-      
-      stacks.push(range)
     }
   }
 
@@ -224,7 +252,67 @@ const generatePoints = (ranges) => {
 
   return points
 }
+// const generatePoints = (ranges) => {
+//   const start = performance.now()
 
+//   const points = {}
+//   let stacks = []
+
+//   iterateRanges: for (let i = 0; i < ranges.length; i++) {
+//     const range = ranges[i]
+
+//     if (!points[range.start]) {
+//       points[range.start] = { start: [], end: [] }
+//     }
+
+//     if (!points[range.end]) {
+//       points[range.end] = { start: [], end: [] }
+//     }
+
+//     for (let i = 0; i < stacks.length; i++) {
+//       const stackRange = stacks[i]
+
+//       if (range.start < stackRange.end && range.end > stackRange.start) {
+//         let range1 = { ...range }
+//         let range2 = { ...range }
+
+//         if (range.start < stackRange.start) {
+//           range1.end = stackRange.start
+//           range2.start = stackRange.start
+//         } else {
+//           range1.end = stackRange.end
+//           range2.start = stackRange.end
+//         }
+
+//         points[range1.start].start = sortStart(points[range1.start].start, range1)
+//         points[range1.end].end = sortEnd(points[range1.end].end, range1)
+
+//         points[range2.start].start = sortStart(points[range2.start].start, range2)
+//         points[range2.end].end = sortEnd(points[range2.end].end, range2)
+
+//         stacks.push(range1)
+//         stacks.push(range2)
+
+//         continue iterateRanges
+//       }
+//     }
+
+//     points[range.start].start = sortStart(points[range.start].start, range)
+
+//     points[range.end].end = sortEnd(points[range.end].end, range)
+
+//     stacks.push(range)
+
+//     // points[range.start].start.push(range)
+
+//     // points[range.end].end.push(range)
+//   }
+
+//   const end = performance.now()
+//   console.log(`Timing generatePoints ${end - start}ms`)
+
+//   return points
+// }
 
 const html = (text) => `
 <style>
