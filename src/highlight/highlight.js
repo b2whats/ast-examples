@@ -2,7 +2,7 @@ const fs = require('fs')
 const { performance } = require('perf_hooks')
 const { parse, traverse } = require('@babel/core')
 
-const source = fs.readFileSync('./source.js', 'utf8')
+const source = fs.readFileSync('./src/highlight/source-test.js', 'utf8')
 
 const options = {
   parserOpts: {
@@ -26,8 +26,13 @@ const generateRanges = (source) => {
         start: path.node.start,
         end: path.node.end,
         type: path.type,
-        length: path.node.end - path.node.start,
-        split: [],
+        noSplit: false,
+        open() {
+          return `<span class='${path.type}'>`
+        },
+        close() {
+          return `</span><!--${path.type}-->`
+        },
       })
     }
   }
@@ -73,19 +78,7 @@ const sortEnd = (ranges, item) => {
 }
 
 function sortByStartAndLength(a, b) {
-  const startA = a.start
-  const startB = b.start
-
-  const lengthA = a.length
-  const lengthB = b.length
-
-  if (startA < startB) return -1;
-  if (startA > startB) return 1;
-
-  if (lengthA > lengthB) return -1;
-  if (lengthA < lengthB) return 1;
-  
-  return 0
+  return a.start - b.start || b.end - a.end
 }
 
 const sortNumber = (a, b) => {
@@ -109,7 +102,18 @@ const insertSort = (arr) => {
 
 const generatePoints = (ranges) => {
   const start = performance.now()
-  ranges.unshift({ start: 75, end: 95, length: 20, type: 'high', noSplit: true, split: [] })
+  ranges.unshift({
+    start: 75,
+    end: 95,
+    type: 'high',
+    noSplit: true,
+    open() {
+      return `<span class='high'>`
+    },
+    close() {
+      return `</span>`
+    }
+  })
   const startSort = performance.now()
   const sortRanges = ranges.sort(sortByStartAndLength)
   const endSort = performance.now()
@@ -124,99 +128,93 @@ const generatePoints = (ranges) => {
     cursor = range.start
 
     if (!points[range.start]) {
-      points[range.start] = { start: [], end: [] }
+      points[range.start] = []
     }
 
     if (!points[range.end]) {
-      points[range.end] = { start: [], end: [] }
+      points[range.end] = []
     }
 
+    //--|====|====|=====|--------------- stackRange
+    //-------|============|------------ range
+    //------------|=======|=====|------- range
+    //---------------------------|==|-- range
+
+    //--|====|=========|--------------- stackRange
+    //-------|============|------------ range
+    //-------|============|------- range
+    //---------------------------------|==|-- range
+
+
+    //--|=========|===========|--------- stackRange
+    //-------|====|========|------------ range
+    //------------|============|------- range
+    //---------------------------|==|-- range
     let stacksLength = stacks.length
     while (stacksLength--) {
       let stackRange = stacks[stacksLength]
 
-      if (stackRange.end <= cursor) {
-        // points[stackRange.start].start.push(stackRange)
-        // points[stackRange.end].end.push(stackRange)
-        points[stackRange.start].start = sortStart(points[stackRange.start].start, stackRange)
-        points[stackRange.end].end = sortEnd(points[stackRange.end].end, stackRange)
+      if (stackRange.end <= range.start) {
+        !stackRange.noSplit && points[stackRange.end].push(stackRange.close)
 
         stacks.splice(stacksLength, 1)
-
-        continue
       }
+    }
 
-      //--|=====|----- stackRange
-      //-----|=====|-- range
+    for (let stackIndex = 0; stackIndex < stacks.length; stackIndex++) {
+      const stackRange = stacks[stackIndex]
+
       if (range.start > stackRange.start && range.start < stackRange.end && range.end > stackRange.end) {
-        //--|=====|----- stackRange
-        //-----|==|----- range1
-        //--------|==|-- range2
-        if (range.noSplit) {
-          stacks.splice(stacksLength, 1,
-            { ...stackRange, end: range.start },
-            { ...stackRange, start: range.start },
-          )
+        if (stackRange.noSplit) {
+          points[stackRange.end].push(range.close)
         } else {
-          range.split.push(stackRange.end)
+          points[range.start].push(stackRange.close)
         }
-
-        continue
-      }
-
-      //-----|=====|-- stackRange
-      //--|=====|----- range
-      if (range.start < stackRange.start && range.end > stackRange.start && range.end < stackRange.end) {
-        //-----|=====|-- stackRange
-        //--|==|-------- range1
-        //-----|==|----- range2
-        if (range.noSplit) {
-          stacks.splice(stacksLength, 1,
-            { ...stackRange, end: range.end },
-            { ...stackRange, start: range.end },
-          )
-        } else {
-          range.split.push(stackRange.start)
-        }
-
-        continue
       }
     }
 
-    if (range.noSplit) {
-      stacks.unshift(range)
-    } else {
-      if (range.split.length === 0) {
-        stacks.push(range)
+    points[range.start].push(range.open)
 
-        continue
+    for (let stackIndex = 0; stackIndex < stacks.length; stackIndex++) {
+      const stackRange = stacks[stackIndex]
+
+      if (range.start > stackRange.start && range.start < stackRange.end && range.end > stackRange.end) {
+        if (stackRange.noSplit) {
+          points[stackRange.end].push(stackRange.close, range.open)
+        } else {
+          points[range.start].push(stackRange.open)
+        }
       }
-
-      insertSort(range.split)
-
-      let cursor = range.start
-
-      range.split.forEach(point => {
-        stacks.push({ ...range, start: cursor, end: point, length: point - cursor })
-
-        cursor = point
-      })
-
-      range.start = cursor
-      range.length = range.end - cursor
-      
-      stacks.push(range)
     }
+
+    stacks.push(range)
+
+    // while (stacksLength--) {
+    //   let stackRange = stacks[stacksLength]
+
+
+    //   //--|=====|----- stackRange
+    //   //-----|=====|-- range
+    //   if (range.start > stackRange.start && range.start < stackRange.end && range.end > stackRange.end) {
+    //     points[range.start] = range.start
+
+    //     continue
+    //   }
+
+    //   //-----|=====|-- stackRange
+    //   //--|=====|----- range
+    //   if (range.start < stackRange.start && range.end > stackRange.start && range.end < stackRange.end) {
+
+    //     continue
+    //   }
+    // }
   }
 
-  for (let i = 0; i < stacks.length; i++) {
-    const range = stacks[i]
-    
-    // points[range.start].start.push(range)
-    // points[range.end].end.push(range)
+  let stacksLength = stacks.length
+  while (stacksLength--) {
+    let stackRange = stacks[stacksLength]
 
-    points[range.start].start = sortStart(points[range.start].start, range)
-    points[range.end].end = sortEnd(points[range.end].end, range)
+    points[stackRange.end].push(stackRange.close)
   }
 
   const end = performance.now()
@@ -246,31 +244,11 @@ const print = (source, points) => {
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i]
 
-    // const start = points[step].start.sort((a, b) => {
-    //   if (!!a.noSplit < !!b.noSplit) return 1
-    //   if (!!a.noSplit > !!b.noSplit) return -1
-
-    //   if (a.length < b.length) return 1
-    //   if (a.length > b.length) return -1
-
-    //   return 0
-    // })
-
-    // const end = points[step].end.sort((a, b) => {
-    //   if (!!a.noSplit > !!b.noSplit) return 1
-    //   if (!!a.noSplit < !!b.noSplit) return -1
-
-    //   if (a.length > b.length) return 1
-    //   if (a.length < b.length) return -1
-
-    //   return 0
-    // })
-
-    const { start, end } = points[step]
-
     result += source.slice(cursor, step)
-    result += end.map(range => `</span>`).join('')
-    result += start.map(range => `<span class='${range.type}'>`).join('')
+
+    for (let i = 0; i < points[step].length; i++) {
+      result += points[step][i]()
+    }
 
     cursor = step
   }
